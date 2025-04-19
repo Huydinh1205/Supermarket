@@ -3897,5 +3897,9 @@
           "#1890FF"
         ]
       }
-    ]
-  }
+    ],
+      "users": {
+        "username": "testuser",
+        "password": "test123" 
+      }
+}

@@ -72,8 +72,30 @@ export const AuthProvider = ({ children }) => {
     initialize();
   }, []);
 
-  const login = async (username, callback) => {
-    window.localStorage.setItem("username", username);
+  const login = async (username, password, callback) => {
+    const storedUser = JSON.parse(window.localStorage.getItem("users"));
+  
+    if (
+      storedUser &&
+      storedUser.username === username &&
+      storedUser.password === password
+    ) {
+      window.localStorage.setItem("username", username);
+      dispatch({
+        type: LOGIN_SUCCESS,
+        payload: { user: { username } },
+      });
+      callback();
+    } else {
+      alert("Invalid username or password");
+    }
+  };
+  
+
+  const signup = async (username, password, callback) => {
+    const newUser = { username, password };
+    window.localStorage.setItem("users", JSON.stringify(newUser));
+    window.localStorage.setItem("username", username); // Optional auto-login
     dispatch({
       type: LOGIN_SUCCESS,
       payload: { user: { username } },
@@ -92,6 +114,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         ...state,
         login,
+        signup,
         logout,
       }}
     >
