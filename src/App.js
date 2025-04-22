@@ -4,8 +4,8 @@ import { Box, Link } from "@mui/material";
 import { AuthProvider } from "./contexts/useAuth";
 import HomePage from "./pages/HomePage";
 import ThemeProvider from "./contexts/ThemeProvider";
-import Router from "./routes/index";
-import { BrowserRouter } from "react-router-dom";
+import Router from "./routes/index"; // Assuming your routes are in this component
+
 function Copyright() {
   return (
     <Typography variant="body2" color="text.secondary" align="center">
@@ -22,11 +22,9 @@ function Copyright() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <ThemeProvider>
-          <Router />
-        </ThemeProvider>
-      </BrowserRouter>
+      <ThemeProvider>
+        <Router />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

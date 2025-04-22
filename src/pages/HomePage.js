@@ -9,9 +9,10 @@ import { useForm } from "react-hook-form";
 import apiService from "../app/apiService";
 import orderBy from "lodash/orderBy";
 import LoadingScreen from "../components/LoadingScreen";
-import data from "../data.json";
+//import data from "../data.json";
+
 function HomePage() {
-  const [products, setProducts] = useState(data.products);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   console.log(products);
@@ -29,21 +30,24 @@ function HomePage() {
   const filters = watch();
   const filterProducts = applyFilter(products, filters);
 
-  // useEffect(() => {
-  //   const getProducts = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await apiService.get("/products");
-  //       setProducts(res.data);
-  //       setError("");
-  //     } catch (error) {
-  //       console.log(error);
-  //       setError(error.message);
-  //     }
-  //     setLoading(false);
-  //   };
-  //   getProducts();
-  // }, []);
+  useEffect(() => {
+    const getProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await apiService.get("/api/products");
+        setProducts(res.data);
+        setError("");
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        setError("Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    getProducts();
+  }, []);
+  
 
   return (
     <Container sx={{ display: "flex", minHeight: "100vh", mt: 3 }}>

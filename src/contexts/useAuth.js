@@ -73,35 +73,42 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (username, password, callback) => {
-    const storedUser = JSON.parse(window.localStorage.getItem("users"));
-  
-    if (
-      storedUser &&
-      storedUser.username === username &&
-      storedUser.password === password
-    ) {
-      window.localStorage.setItem("username", username);
-      dispatch({
-        type: LOGIN_SUCCESS,
-        payload: { user: { username } },
+    try {
+      const res = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
+  
+      if (!res.ok) throw new Error("Invalid login");
+  
+      const data = await res.json();
+  
+      localStorage.setItem("username", data.user.username);
+      dispatch({ type: LOGIN_SUCCESS, payload: { user: data.user } });
+  
       callback();
-    } else {
-      alert("Invalid username or password");
+    } catch (err) {
+      alert("Login failed: " + err.message);
     }
   };
   
-
   const signup = async (username, password, callback) => {
-    const newUser = { username, password };
-    window.localStorage.setItem("users", JSON.stringify(newUser));
-    window.localStorage.setItem("username", username); // Optional auto-login
-    dispatch({
-      type: LOGIN_SUCCESS,
-      payload: { user: { username } },
-    });
-    callback();
+    try {
+      const res = await fetch("http://localhost:5000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      if (!res.ok) throw new Error("Signup failed");
+  
+      callback(); // navigate to login
+    } catch (err) {
+      alert("Signup failed: " + err.message);
+    }
   };
+  
 
   const logout = async (callback) => {
     window.localStorage.removeItem("username");
