@@ -10,12 +10,12 @@ import { fCurrency } from "../utils";
 function ProductCard({ product }) {
   const navigate = useNavigate();
   return (
-    <Card onClick={() => navigate(`/product/${product.id}`)}>
+    <Card onClick={() => navigate(`/product/${product.productid}`)}>
       <CardActionArea>
         <CardMedia
           component="img"
           height="200"
-          image={product.cover}
+          image={product.imageurl}
           alt="green iguana"
         />
         <CardContent>

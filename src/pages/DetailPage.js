@@ -30,12 +30,13 @@ function DetailPage() {
       const getProduct = async () => {
         setLoading(true);
         try {
-          const res = await apiService.get(`/products/${params.id}`);
+          const res = await apiService.get(`/api/products/${params.id}`);
+          console.log("Product fetched:", res.data);
           setProduct(res.data);
           setError("");
         } catch (error) {
-          console.log(error);
-          setError(error.message);
+          console.log("Error fetching product:", error.response?.data || error.message);
+          setError("Error fetching product details");
         }
         setLoading(false);
       };
@@ -78,7 +79,7 @@ function DetailPage() {
                                 width: 1,
                                 height: 1,
                               }}
-                              src={product.cover}
+                              src={product.imageurl}
                               alt="product"
                             />
                           </Box>
