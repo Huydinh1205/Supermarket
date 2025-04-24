@@ -24,20 +24,34 @@ router.get("/products", async (req, res) => {
   }
 });
 
-// Get single product by ID
+// Get a single product by ID
 router.get("/products/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
-    const result = await db.query("SELECT * FROM Product WHERE ProductID = $1", [id]);
+    const result = await db.query(
+      `SELECT 
+        p.*,
+        c.Name AS categoryname,
+        w.Name AS warehousename
+      FROM Product p
+      LEFT JOIN Category c ON p.CategoryID = c.CategoryID
+      LEFT JOIN Warehouse w ON c.WarehouseID = w.WarehouseID
+      WHERE p.ProductID = $1`,
+      [id]
+    );
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
+
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Error fetching product:", err);
+    console.error("Error fetching product by ID:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // Create new product
 router.post("/products", upload.single("image"), async (req, res) => {
@@ -78,6 +92,38 @@ router.get("/customers", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching customers:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get all categories
+router.get("/categories", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM Category");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Get all warehouses
+router.get("/warehouses", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM Warehouse");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching warehouses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+// Get all orders
+router.get("/orders", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM OrderDetails");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching orders:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

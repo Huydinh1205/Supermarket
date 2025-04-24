@@ -5,9 +5,13 @@ import MainLayout from "../layouts/MainLayout";
 import DetailPage from "../pages/DetailPage";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
-import SignUpPage from "../pages/SignUpPage"; 
+import SignUpPage from "../pages/SignUpPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import AuthRequire from "./AuthRequire";
+
+// 👉 Import the new payment pages
+import PaymentPage from "../pages/PaymentPage";
+import PaymentSuccessPage from "../pages/PaymentSuccessPage";
 
 function Router() {
   return (
@@ -22,6 +26,10 @@ function Router() {
       >
         <Route index element={<HomePage />} />
         <Route path="product/:id" element={<DetailPage />} />
+
+        {/* ✅ Add these routes under the protected layout */}
+        <Route path="payment/:productid" element={<PaymentPage />} />
+        <Route path="payment-success/:productid" element={<PaymentSuccessPage />} />
       </Route>
 
       <Route element={<BlankLayout />}>

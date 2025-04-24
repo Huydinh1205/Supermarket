@@ -9,23 +9,23 @@ import { useForm } from "react-hook-form";
 import apiService from "../app/apiService";
 import orderBy from "lodash/orderBy";
 import LoadingScreen from "../components/LoadingScreen";
-//import data from "../data.json";
 
 function HomePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  console.log(products);
+  
   const defaultValues = {
-    gender: [],
-    category: "All",
+    categoryid: "0",  // Changed to string "0" to match our updated ProductFilter
     priceRange: "",
     sortBy: "featured",
     searchQuery: "",
   };
+  
   const methods = useForm({
     defaultValues,
   });
+  
   const { watch, reset } = methods;
   const filters = watch();
   const filterProducts = applyFilter(products, filters);
@@ -47,7 +47,6 @@ function HomePage() {
   
     getProducts();
   }, []);
-  
 
   return (
     <Container sx={{ display: "flex", minHeight: "100vh", mt: 3 }}>
@@ -88,50 +87,61 @@ function HomePage() {
 }
 
 function applyFilter(products, filters) {
-  const { sortBy } = filters;
-  let filteredProducts = products;
+  const { sortBy, categoryid, priceRange, searchQuery } = filters;
+  let filteredProducts = [...products];
+  
+  // For debugging - log the filter values
+  console.log("Applied filters:", filters);
 
   // SORT BY
   if (sortBy === "featured") {
-    filteredProducts = orderBy(products, ["sold"], ["desc"]);
+    filteredProducts = orderBy(filteredProducts, ["sold"], ["desc"]);
   }
   if (sortBy === "newest") {
-    filteredProducts = orderBy(products, ["createdAt"], ["desc"]);
+    filteredProducts = orderBy(filteredProducts, ["createdAt"], ["desc"]);
   }
   if (sortBy === "priceDesc") {
-    filteredProducts = orderBy(products, ["price"], ["desc"]);
+    filteredProducts = orderBy(filteredProducts, ["price"], ["desc"]);
   }
   if (sortBy === "priceAsc") {
-    filteredProducts = orderBy(products, ["price"], ["asc"]);
+    filteredProducts = orderBy(filteredProducts, ["price"], ["asc"]);
   }
 
   // FILTER PRODUCTS
-  if (filters.gender.length > 0) {
-    filteredProducts = products.filter((product) =>
-      filters.gender.includes(product.gender)
-    );
+  if (categoryid && categoryid !== "0") { // Changed comparison to string "0"
+    // Debug what's coming from the form
+    console.log("Category filter type:", typeof categoryid);
+    console.log("Category filter value:", categoryid);
+    
+    // Ensure we're working with a number for comparison
+    const categoryIdNum = Number(categoryid);
+    
+    filteredProducts = filteredProducts.filter((product) => {
+      return product.categoryid === categoryIdNum;
+    });
   }
-  if (filters.category !== "All") {
-    filteredProducts = products.filter(
-      (product) => product.category === filters.category
-    );
-  }
-  if (filters.priceRange) {
-    filteredProducts = products.filter((product) => {
-      if (filters.priceRange === "below") {
+  
+  if (priceRange) {
+    filteredProducts = filteredProducts.filter((product) => {
+      if (priceRange === "below") {
         return product.price < 25;
       }
-      if (filters.priceRange === "between") {
+      if (priceRange === "between") {
         return product.price >= 25 && product.price <= 75;
       }
       return product.price > 75;
     });
   }
-  if (filters.searchQuery) {
-    filteredProducts = products.filter((product) =>
-      product.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
+  
+  if (searchQuery) {
+    filteredProducts = filteredProducts.filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
+  
+  // Debug the filter results
+  console.log("Filtered products count:", filteredProducts.length);
+  
   return filteredProducts;
 }
 

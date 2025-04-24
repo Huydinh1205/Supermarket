@@ -1,21 +1,14 @@
+import { useEffect, useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { FMultiCheckbox, FRadioGroup } from "./form";
+import FRadioGroup from "./form/FRadioGroup"; // Adjust the import path as needed
 import ClearAllIcon from "@mui/icons-material/ClearAll";
+import apiService from "../app/apiService";
 
 export const SORT_BY_OPTIONS = [
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
   { value: "priceDesc", label: "Price: High-Low" },
   { value: "priceAsc", label: "Price: Low-High" },
-];
-
-export const FILTER_GENDER_OPTIONS = ["Men", "Women", "Kids"];
-
-export const FILTER_CATEGORY_OPTIONS = [
-  "All",
-  "Shose",
-  "Apparel",
-  "Accessories",
 ];
 
 export const FILTER_PRICE_OPTIONS = [
@@ -25,45 +18,59 @@ export const FILTER_PRICE_OPTIONS = [
 ];
 
 function ProductFilter({ resetFilter }) {
+  const [categoryOptions, setCategoryOptions] = useState([{ value: "0", label: "All" }]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await apiService.get("/api/categories");
+        const categories = response.data.map((c) => ({
+          value: c.categoryid.toString(), // Convert to string to avoid issues
+          label: c.name,
+        }));
+        console.log("Fetched categories:", categories);
+        setCategoryOptions([{ value: "0", label: "All" }, ...categories]);
+      } catch (error) {
+        console.error("Failed to load categories", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <Stack spacing={3} sx={{ p: 3, width: 250 }}>
-      <Stack spacing={1}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Gender
-        </Typography>
-        <FMultiCheckbox
-          name="gender"
-          options={FILTER_GENDER_OPTIONS}
-          sx={{ width: 1 }}
-        />
-      </Stack>
-
+      {/* Category Filter */}
       <Stack spacing={1}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Category
         </Typography>
         <FRadioGroup
-          name="category"
-          options={FILTER_CATEGORY_OPTIONS}
-          row={false}
+          name="categoryid"
+          options={categoryOptions}
+          getOptionLabel={(option) => option.label}
+          keyExtractor={(option) => option.value}
         />
       </Stack>
 
+      {/* Price Filter */}
       <Stack spacing={1}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Price
         </Typography>
         <FRadioGroup
           name="priceRange"
-          options={FILTER_PRICE_OPTIONS.map((item) => item.value)}
-          getOptionLabel={FILTER_PRICE_OPTIONS.map((item) => item.label)}
+          options={FILTER_PRICE_OPTIONS}
+          getOptionLabel={(option) => option.label}
+          keyExtractor={(option) => option.value}
         />
       </Stack>
 
+      {/* Clear All Button */}
       <Box>
         <Button
           size="large"
-          type="submit"
+          type="button"
           color="inherit"
           variant="outlined"
           onClick={resetFilter}
