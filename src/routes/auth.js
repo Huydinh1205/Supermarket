@@ -6,28 +6,19 @@ const bcrypt = require("bcrypt");
 
 // Signup
 router.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email, phonenumber, address } = req.body;
 
   try {
-    const existingUser = await pool.query(
-      "SELECT * FROM users WHERE username = $1",
-      [username]
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: "Username already exists" });
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
       "INSERT INTO users (username, password) VALUES ($1, $2)",
       [username, hashedPassword]
     );
 
-    res.status(201).json({ message: "User created successfully" });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(201).json({ message: "User and customer profile created", userId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Signup failed" });
   }
 });
 
@@ -53,5 +44,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 module.exports = router;

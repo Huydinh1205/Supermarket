@@ -25,7 +25,7 @@ function ProductFilter({ resetFilter }) {
       try {
         const response = await apiService.get("/api/categories");
         const categories = response.data.map((c) => ({
-          value: c.categoryid.toString(), // Convert to string to avoid issues
+          value: c.categoryid.toString(),
           label: c.name,
         }));
         console.log("Fetched categories:", categories);

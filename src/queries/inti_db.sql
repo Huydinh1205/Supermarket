@@ -1,5 +1,5 @@
 mywebapp!!!!!
-
+psql -d myuser -d mywebapp
 -- Insert Employees
 INSERT INTO Employee (Name, PhoneNumber, Role, Salary)
 VALUES 

@@ -93,12 +93,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
-  const signup = async (username, password, callback) => {
+  const signup = async ({ username, password, email, phonenumber,address }, callback) => {
     try {
       const res = await fetch("http://localhost:5000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, email, phonenumber, address }),
       });
   
       if (!res.ok) throw new Error("Signup failed");
@@ -108,6 +108,7 @@ export const AuthProvider = ({ children }) => {
       alert("Signup failed: " + err.message);
     }
   };
+  
   
 
   const logout = async (callback) => {

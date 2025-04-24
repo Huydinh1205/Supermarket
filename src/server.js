@@ -5,7 +5,7 @@ const app = express();
 
 // Import route modules
 const authRoutes = require("./routes/auth");
-const productRoutes = require("./routes/API"); 
+const productRoutes = require("./routes/API");
 
 // Middleware
 app.use(cors({ origin: "http://localhost:3000" })); 
