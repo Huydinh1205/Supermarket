@@ -190,4 +190,24 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// GET endpoint to fetch orders by customer ID
+router.get('/customers/:customerid/orders', async (req, res) => {
+  const { customerid } = req.params;
+  
+  try {
+    // Query to get all orders for a specific customer
+    const result = await pool.query(
+      `SELECT * FROM OrderTable
+       WHERE customerid = $1
+       ORDER BY orderdate DESC`,
+      [customerid]
+    );
+    
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching customer orders:", err);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
 module.exports = router;
