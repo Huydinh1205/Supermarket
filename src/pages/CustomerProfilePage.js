@@ -29,7 +29,6 @@ export default function CustomerProfilePage() {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        // now using path param instead of query
         const res = await apiService.get(`/api/profile/customer/${user.id}`);
         setCustomerInfo(res.data);
         setError("");
@@ -43,14 +42,6 @@ export default function CustomerProfilePage() {
 
     fetchProfile();
   }, [user]);
-
-  if (!user?.id) {
-    return (
-      <Container sx={{ py: 5 }}>
-        <Alert severity="warning">You must be logged in to view your profile.</Alert>
-      </Container>
-    );
-  }
 
   return (
     <Container sx={{ py: 5, minHeight: "100vh" }}>

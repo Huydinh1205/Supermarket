@@ -10,7 +10,6 @@ import { useAuth } from "../contexts/useAuth";
 // Validation Schema
 const SignUpSchema = Yup.object().shape({
   username: Yup.string().required("Username is required"),
-  // Add to validation schema
   email: Yup.string().email("Invalid email").required("Email is required"),
   phonenumber: Yup.string().required("Phone number is required"),
   address: Yup.string().required("Address is required"), // Add address validation
@@ -27,7 +26,7 @@ const defaultValues = {
   username: "",
   email: "",
   phonenumber: "",
-  address: "",  
+  address: "",  // Include address in default values
   password: "",
   confirmPassword: "",
 };
@@ -44,9 +43,9 @@ function SignUpPage() {
   const { handleSubmit } = methods;
 
   const onSubmit = async (data) => {
-    const { username, password, email, phonenumber,address  } = data;
+    const { username, password, email, phonenumber, address } = data;
   
-    auth.signup({ username, password, email, phonenumber, address  }, () => {
+    auth.signup({ username, password, email, phonenumber, address }, () => {
       console.log("Signup successful. Redirecting to login...");
       navigate("/login");
     });
