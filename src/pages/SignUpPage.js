@@ -10,6 +10,9 @@ import { useAuth } from "../contexts/useAuth";
 // Validation Schema
 const SignUpSchema = Yup.object().shape({
   username: Yup.string().required("Username is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  phonenumber: Yup.string().required("Phone number is required"),
+  address: Yup.string().required("Address is required"), // Add address validation
   password: Yup.string()
     .required("Password is required")
     .min(6, "Password must be at least 6 characters"),
@@ -21,6 +24,9 @@ const SignUpSchema = Yup.object().shape({
 // Default Values
 const defaultValues = {
   username: "",
+  email: "",
+  phonenumber: "",
+  address: "",  // Include address in default values
   password: "",
   confirmPassword: "",
 };
@@ -37,15 +43,14 @@ function SignUpPage() {
   const { handleSubmit } = methods;
 
   const onSubmit = async (data) => {
-    const { username, password } = data;
-
-    // Replace this with your actual signup logic
-    auth.signup(username, password, () => {
+    const { username, password, email, phonenumber, address } = data;
+  
+    auth.signup({ username, password, email, phonenumber, address }, () => {
       console.log("Signup successful. Redirecting to login...");
       navigate("/login");
     });
   };
-
+  
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3} sx={{ minWidth: "350px" }}>
@@ -54,6 +59,9 @@ function SignUpPage() {
         </Typography>
 
         <FTextField name="username" label="Username" />
+        <FTextField name="email" label="Email" />
+        <FTextField name="phonenumber" label="Phone Number" />
+        <FTextField name="address" label="Address" /> {/* Add address field */}
         <FTextField name="password" label="Password" type="password" />
         <FTextField name="confirmPassword" label="Confirm Password" type="password" />
 

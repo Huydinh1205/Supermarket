@@ -3,20 +3,29 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import { CardActionArea, Stack } from "@mui/material";
+import { Button, CardActionArea, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { fCurrency } from "../utils";
 
 function ProductCard({ product }) {
   const navigate = useNavigate();
+
+  const handleGoToDetail = () => {
+    navigate(`/product/${product.productid}`);
+  };
+
+  const handleGoToPayment = () => {
+    navigate(`/payment/${product.productid}`);
+  };
+
   return (
-    <Card onClick={() => navigate(`/product/${product.id}`)}>
-      <CardActionArea>
+    <Card>
+      <CardActionArea onClick={handleGoToDetail}>
         <CardMedia
           component="img"
           height="200"
-          image={product.cover}
-          alt="green iguana"
+          image={product.imageurl}
+          alt={product.name}
         />
         <CardContent>
           <Typography gutterBottom variant="body1" component="div" noWrap>
@@ -42,6 +51,13 @@ function ProductCard({ product }) {
           </Stack>
         </CardContent>
       </CardActionArea>
+
+      {/* Pay Now button OUTSIDE CardActionArea to avoid accidental navigation */}
+      <CardContent>
+        <Button variant="contained" fullWidth onClick={handleGoToPayment}>
+          Pay Now
+        </Button>
+      </CardContent>
     </Card>
   );
 }

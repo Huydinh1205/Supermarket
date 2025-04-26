@@ -3,9 +3,16 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 
+// Get the root element in your HTML
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+
+// Render the App inside the BrowserRouter to enable routing
+root.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals();
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals

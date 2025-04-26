@@ -6,7 +6,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 
-function FRadioGroup({ name, options, getOptionLabel, ...other }) {
+function FRadioGroup({ name, options, getOptionLabel, keyExtractor, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -16,12 +16,12 @@ function FRadioGroup({ name, options, getOptionLabel, ...other }) {
       render={({ field, fieldState: { error } }) => (
         <div>
           <RadioGroup {...field} row {...other}>
-            {options.map((option, index) => (
+            {options.map((option) => (
               <FormControlLabel
-                key={option}
-                value={option}
+                key={keyExtractor ? keyExtractor(option) : option.value}
+                value={keyExtractor ? keyExtractor(option).toString() : option.value.toString()}
                 control={<Radio />}
-                label={getOptionLabel?.length ? getOptionLabel[index] : option}
+                label={getOptionLabel ? getOptionLabel(option) : option.label}
               />
             ))}
           </RadioGroup>

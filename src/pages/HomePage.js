@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Alert, Box, Container, Stack } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Stack
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import ProductFilter from "../components/ProductFilter";
 import ProductSearch from "../components/ProductSearch";
 import ProductSort from "../components/ProductSort";
@@ -9,50 +16,71 @@ import { useForm } from "react-hook-form";
 import apiService from "../app/apiService";
 import orderBy from "lodash/orderBy";
 import LoadingScreen from "../components/LoadingScreen";
-import data from "../data.json";
+
 function HomePage() {
-  const [products, setProducts] = useState(data.products);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  console.log(products);
+
+  const navigate = useNavigate(); // 👈 for navigation
+
   const defaultValues = {
-    gender: [],
-    category: "All",
+    categoryid: "0", // Use string for select compatibility
     priceRange: "",
     sortBy: "featured",
     searchQuery: "",
   };
-  const methods = useForm({
-    defaultValues,
-  });
+
+  const methods = useForm({ defaultValues });
   const { watch, reset } = methods;
   const filters = watch();
   const filterProducts = applyFilter(products, filters);
 
-  // useEffect(() => {
-  //   const getProducts = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const res = await apiService.get("/products");
-  //       setProducts(res.data);
-  //       setError("");
-  //     } catch (error) {
-  //       console.log(error);
-  //       setError(error.message);
-  //     }
-  //     setLoading(false);
-  //   };
-  //   getProducts();
-  // }, []);
+  useEffect(() => {
+    const getProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await apiService.get("/api/products");
+        setProducts(res.data);
+        setError("");
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        setError("Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getProducts();
+  }, []);
 
   return (
     <Container sx={{ display: "flex", minHeight: "100vh", mt: 3 }}>
+      {/* Sidebar Filters */}
       <Stack>
         <FormProvider methods={methods}>
           <ProductFilter resetFilter={reset} />
         </FormProvider>
       </Stack>
+
+      {/* Main Content Area */}
       <Stack sx={{ flexGrow: 1 }}>
+        {/* Navigation Buttons */}
+        <Stack
+          direction="row"
+          spacing={2}
+          mb={2}
+          justifyContent="flex-end"
+        >
+          <Button variant="outlined" onClick={() => navigate("/profile")}>
+            Profile
+          </Button>
+          <Button variant="contained" onClick={() => navigate("/orders")}>
+            Orders
+          </Button>
+        </Stack>
+
+        {/* Filter bar: Search + Sort */}
         <FormProvider methods={methods}>
           <Stack
             spacing={2}
@@ -65,17 +93,15 @@ function HomePage() {
             <ProductSort />
           </Stack>
         </FormProvider>
+
+        {/* Product List */}
         <Box sx={{ position: "relative", height: 1 }}>
           {loading ? (
             <LoadingScreen />
+          ) : error ? (
+            <Alert severity="error">{error}</Alert>
           ) : (
-            <>
-              {error ? (
-                <Alert severity="error">{error}</Alert>
-              ) : (
-                <ProductList products={filterProducts} />
-              )}
-            </>
+            <ProductList products={filterProducts} />
           )}
         </Box>
       </Stack>
@@ -84,50 +110,47 @@ function HomePage() {
 }
 
 function applyFilter(products, filters) {
-  const { sortBy } = filters;
-  let filteredProducts = products;
+  const { sortBy, categoryid, priceRange, searchQuery } = filters;
+  let filteredProducts = [...products];
 
   // SORT BY
   if (sortBy === "featured") {
-    filteredProducts = orderBy(products, ["sold"], ["desc"]);
+    filteredProducts = orderBy(filteredProducts, ["sold"], ["desc"]);
   }
   if (sortBy === "newest") {
-    filteredProducts = orderBy(products, ["createdAt"], ["desc"]);
+    filteredProducts = orderBy(filteredProducts, ["createdat"], ["desc"]);
   }
   if (sortBy === "priceDesc") {
-    filteredProducts = orderBy(products, ["price"], ["desc"]);
+    filteredProducts = orderBy(filteredProducts, ["price"], ["desc"]);
   }
   if (sortBy === "priceAsc") {
-    filteredProducts = orderBy(products, ["price"], ["asc"]);
+    filteredProducts = orderBy(filteredProducts, ["price"], ["asc"]);
   }
 
-  // FILTER PRODUCTS
-  if (filters.gender.length > 0) {
-    filteredProducts = products.filter((product) =>
-      filters.gender.includes(product.gender)
+  // FILTER BY CATEGORY
+  if (categoryid && categoryid !== "0") {
+    const categoryIdNum = Number(categoryid);
+    filteredProducts = filteredProducts.filter(
+      (product) => product.categoryid === categoryIdNum
     );
   }
-  if (filters.category !== "All") {
-    filteredProducts = products.filter(
-      (product) => product.category === filters.category
-    );
-  }
-  if (filters.priceRange) {
-    filteredProducts = products.filter((product) => {
-      if (filters.priceRange === "below") {
-        return product.price < 25;
-      }
-      if (filters.priceRange === "between") {
-        return product.price >= 25 && product.price <= 75;
-      }
+
+  // FILTER BY PRICE
+  if (priceRange) {
+    filteredProducts = filteredProducts.filter((product) => {
+      if (priceRange === "below") return product.price < 25;
+      if (priceRange === "between") return product.price >= 25 && product.price <= 75;
       return product.price > 75;
     });
   }
-  if (filters.searchQuery) {
-    filteredProducts = products.filter((product) =>
-      product.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
+
+  // FILTER BY SEARCH QUERY
+  if (searchQuery) {
+    filteredProducts = filteredProducts.filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
+
   return filteredProducts;
 }
 
