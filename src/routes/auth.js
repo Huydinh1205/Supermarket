@@ -1,4 +1,3 @@
-// backend/routes/auth.js
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
@@ -59,7 +58,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    res.status(200).json({ user: { id: user.id, username: user.username } });
+    res.status(200).json({ user: { id: user.id, username: user.username, role: user.role, employeeId: user.employeeid,
+    } });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: "Server error" });

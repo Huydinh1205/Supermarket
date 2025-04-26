@@ -1,3 +1,4 @@
+import { RollerShades } from "@mui/icons-material";
 import { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
 const initialState = {
@@ -46,11 +47,12 @@ export const AuthProvider = ({ children }) => {
     const initialize = async () => {
       try {
         const username = window.localStorage.getItem("username");
+        const role = window.localStorage.getItem("role");
 
-        if (username) {
+        if (username && role) {
           dispatch({
             type: INITIALIZE,
-            payload: { isAuthenticated: true, user: { username } },
+            payload: { isAuthenticated: true, user: { username, role} },
           });
         } else {
           dispatch({
@@ -85,10 +87,17 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
   
       localStorage.setItem("username", data.user.username);
+      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("employeeId", data.user.employeeid);
       dispatch({ type: LOGIN_SUCCESS, payload: { user: data.user } });
-  
-      callback();
-    } catch (err) {
+      if (data.user.role === "Cashier") {
+        callback("/cashier-dashboard");
+      } else if (data.user.role === "Consultant") {
+        callback("/consultant-dashboard");
+      } else {
+        callback("/"); // fallback to home
+      }
+      } catch (err) {
       alert("Login failed: " + err.message);
     }
   };

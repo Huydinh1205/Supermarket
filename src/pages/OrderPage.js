@@ -17,20 +17,19 @@ function OrderPage() {
 
       setLoading(true);
       try {
-        // Step 1: Get the customer info using the existing API endpoint
         const customerResponse = await apiService.get(`/api/customers/by-user/${user.id}`);
-        
-        if (!customerResponse.data || !customerResponse.data.customerid) {
+        const customerId = customerResponse.data?.customerid;
+
+        if (!customerId) {
           setError("Customer information not found");
-          setLoading(false);
           return;
         }
-        
-        const customerId = customerResponse.data.customerid;
-        
-        // Step 2: Now fetch orders using the customerid
+
         const ordersResponse = await apiService.get(`/api/customers/${customerId}/orders`);
-        setOrders(ordersResponse.data);
+        const allOrders = ordersResponse.data || [];
+
+        const unpaidOrders = allOrders.filter((order) => order.status.toLowerCase() !== "paid");
+        setOrders(unpaidOrders);
       } catch (err) {
         console.error("Failed to fetch orders:", err);
         setError("Failed to load orders.");
@@ -41,6 +40,35 @@ function OrderPage() {
 
     fetchOrders();
   }, [user?.id]);
+
+  const handlePayAll = async () => {
+    if (!user?.id || orders.length === 0) return;
+  
+    try {
+      const customerResponse = await apiService.get(`/api/customers/by-user/${user.id}`);
+      const customerId = customerResponse.data.customerid;
+  
+      const orderIds = orders.map((order) => order.orderid);
+  
+      await apiService.post(`/api/customers/${customerId}/invoices`, {
+        orderids: orderIds,
+      });
+  
+      alert("Invoice created successfully!");
+      
+      // Optionally, refetch orders to update the UI
+      const ordersResponse = await apiService.get(`/api/customers/${customerId}/orders`);
+      const updatedOrders = ordersResponse.data || [];
+      const unpaidOrders = updatedOrders.filter((order) => order.status.toLowerCase() !== "paid");
+      setOrders(unpaidOrders);
+  
+      navigate("/profile");
+    } catch (err) {
+      console.error("Failed to create invoice:", err);
+      alert("Failed to create invoice.");
+    }
+  };
+  
 
   return (
     <Container sx={{ py: 5, minHeight: "100vh" }}>
@@ -59,18 +87,38 @@ function OrderPage() {
       ) : (
         <Box>
           {orders.length === 0 ? (
-            <Typography>No orders found.</Typography>
+            <Typography>No unpaid orders found.</Typography>
           ) : (
-            orders.map((order) => (
-              <Box key={order.orderid} sx={{ mb: 2, p: 2, border: "1px solid #ccc", borderRadius: 2 }}>
-                <Typography><strong>Order ID:</strong> {order.orderid}</Typography>
-                <Typography><strong>Status:</strong> {order.status}</Typography>
-                <Typography><strong>Address:</strong> {order.address}</Typography>
-                <Typography><strong>Product ID:</strong> {order.productid}</Typography>
-                <Typography><strong>Payment Method:</strong> {order.paymentmethod}</Typography>
-                <Typography><strong>Order Date:</strong> {new Date(order.orderdate).toLocaleDateString()}</Typography>
-              </Box>
-            ))
+            <Box>
+              {orders.map((order) => (
+                <Box
+                  key={order.orderid}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    border: "1px solid #ccc",
+                    borderRadius: 2,
+                    boxShadow: 1,
+                  }}
+                >
+                  <Typography><strong>Order ID:</strong> {order.orderid}</Typography>
+                  <Typography><strong>Status:</strong> {order.status}</Typography>
+                  <Typography><strong>Address:</strong> {order.address}</Typography>
+                  <Typography><strong>Product ID:</strong> {order.productid}</Typography>
+                  <Typography><strong>Payment Method:</strong> {order.paymentmethod}</Typography>
+                  <Typography><strong>Order Date:</strong> {new Date(order.orderdate).toLocaleDateString()}</Typography>
+                </Box>
+              ))}
+
+              <Button
+                variant="contained"
+                color="success"
+                sx={{ mt: 4 }}
+                onClick={handlePayAll}
+              >
+                Pay All
+              </Button>
+            </Box>
           )}
         </Box>
       )}
