@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Stack, Typography, Button } from "@mui/material";
 import { useForm } from "react-hook-form";
@@ -26,7 +26,7 @@ const defaultValues = {
   username: "",
   email: "",
   phonenumber: "",
-  address: "",  // Include address in default values
+  address: "", // Include address in default values
   password: "",
   confirmPassword: "",
 };
@@ -39,32 +39,46 @@ function SignUpPage() {
     resolver: yupResolver(SignUpSchema),
     defaultValues,
   });
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { handleSubmit } = methods;
 
   const onSubmit = async (data) => {
     const { username, password, email, phonenumber, address } = data;
-  
-    auth.signup({ username, password, email, phonenumber, address }, () => {
-      console.log("Signup successful. Redirecting to login...");
-      navigate("/login");
-    });
+
+    const error = await auth.signup(
+      { username, password, email, phonenumber, address },
+      () => {
+        console.log("Signup successful. Redirecting to login...");
+        navigate("/login");
+      }
+    );
+    if (error) {
+      setErrorMessage(error);
+    }
   };
-  
+
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3} sx={{ minWidth: "350px" }}>
         <Typography variant="h4" textAlign="center">
           Sign Up
         </Typography>
-
         <FTextField name="username" label="Username" />
         <FTextField name="email" label="Email" />
         <FTextField name="phonenumber" label="Phone Number" />
         <FTextField name="address" label="Address" /> {/* Add address field */}
         <FTextField name="password" label="Password" type="password" />
-        <FTextField name="confirmPassword" label="Confirm Password" type="password" />
-
+        <FTextField
+          name="confirmPassword"
+          label="Confirm Password"
+          type="password"
+        />
+        {errorMessage && (
+          <Typography color="error" variant="body2" textAlign="center">
+            Invalid username or password
+          </Typography>
+        )}
         <Button type="submit" variant="contained">
           Create Account
         </Button>

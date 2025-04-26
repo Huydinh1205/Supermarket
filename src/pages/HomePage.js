@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Container,
-  Stack
-} from "@mui/material";
+import { Alert, Box, Button, Container, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ProductFilter from "../components/ProductFilter";
 import ProductSearch from "../components/ProductSearch";
@@ -40,7 +34,7 @@ function HomePage() {
     const getProducts = async () => {
       setLoading(true);
       try {
-        const res = await apiService.get("/api/products");
+        const res = await apiService.get("/todos/products");
         setProducts(res.data);
         setError("");
       } catch (error) {
@@ -66,12 +60,7 @@ function HomePage() {
       {/* Main Content Area */}
       <Stack sx={{ flexGrow: 1 }}>
         {/* Navigation Buttons */}
-        <Stack
-          direction="row"
-          spacing={2}
-          mb={2}
-          justifyContent="flex-end"
-        >
+        <Stack direction="row" spacing={2} mb={2} justifyContent="flex-end">
           <Button variant="outlined" onClick={() => navigate("/profile")}>
             Profile
           </Button>
@@ -139,7 +128,8 @@ function applyFilter(products, filters) {
   if (priceRange) {
     filteredProducts = filteredProducts.filter((product) => {
       if (priceRange === "below") return product.price < 25;
-      if (priceRange === "between") return product.price >= 25 && product.price <= 75;
+      if (priceRange === "between")
+        return product.price >= 25 && product.price <= 75;
       return product.price > 75;
     });
   }

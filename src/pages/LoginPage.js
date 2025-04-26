@@ -1,5 +1,5 @@
 import { Button, Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FormProvider, FTextField } from "../components/form";
 import { useAuth } from "../contexts/useAuth";
@@ -28,7 +28,7 @@ function LoginPage() {
     resolver: yupResolver(LoginSchema),
     defaultValues,
   });
-
+  const [errorMessage, setErrorMessage] = useState("");
   const { handleSubmit } = methods;
 
   const onSubmit = async (data) => {
@@ -36,10 +36,13 @@ function LoginPage() {
     const { username, password } = data;
 
     // Attempt login via auth context
-    auth.login(username, password, () => {
+    const error = await auth.login(username, password, () => {
       console.log("Login successful, navigating to:", from);
       navigate(from, { replace: true });
     });
+    if (error) {
+      setErrorMessage(error);
+    }
   };
 
   const handleSignUpClick = () => {
@@ -55,7 +58,11 @@ function LoginPage() {
 
         <FTextField name="username" label="Username" />
         <FTextField name="password" label="Password" type="password" />
-
+        {errorMessage && (
+          <Typography color="error" variant="body2" textAlign="center">
+            Invalid username or password
+          </Typography>
+        )}
         <Button type="submit" variant="contained">
           Login
         </Button>

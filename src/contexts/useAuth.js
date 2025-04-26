@@ -1,37 +1,52 @@
-import { createContext, useContext, useReducer } from "react";
-import { useEffect } from "react";
+import { createContext, useContext, useReducer, useEffect } from "react";
+import apiService from "../app/apiService";
+import { jwtDecode } from "jwt-decode"; // <-- thêm dòng này
+
 const initialState = {
   isAuthenticated: false,
-  isInitialized: true,
-  user: null,
+  isInitialized: false,
+  token: null,
+  user: null, // <-- thêm user
 };
 
 const INITIALIZE = "INITIALIZE";
 const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 const LOGOUT = "LOGOUT";
+const UPDATE_PROFILE = "UPDATE_PROFILE";
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case INITIALIZE:
-      const { isAuthenticated, user } = action.payload;
+    case INITIALIZE: {
+      const { isAuthenticated, token } = action.payload;
+      const user = token ? jwtDecode(token) : null; // decode user từ token
       return {
         ...state,
         isAuthenticated,
         isInitialized: true,
+        token,
         user,
       };
-    case LOGIN_SUCCESS:
-      console.log(!state.isAuthenticated);
+    }
+    case LOGIN_SUCCESS: {
+      const decodedUser = jwtDecode(action.payload.token);
       return {
         ...state,
         isAuthenticated: true,
-        user: action.payload.user,
+        token: action.payload.token,
+        user: decodedUser,
       };
+    }
     case LOGOUT:
       return {
         ...state,
         isAuthenticated: false,
+        token: null,
         user: null,
+      };
+    case UPDATE_PROFILE:
+      return {
+        ...state,
+        user: { ...state.user, ...action.payload },
       };
     default:
       return state;
@@ -42,30 +57,27 @@ export const AuthContext = createContext({ ...initialState });
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   useEffect(() => {
     const initialize = async () => {
       try {
-        const username = window.localStorage.getItem("username");
-
-        if (username) {
+        const token = window.localStorage.getItem("token");
+        if (token) {
           dispatch({
             type: INITIALIZE,
-            payload: { isAuthenticated: true, user: { username } },
+            payload: { isAuthenticated: true, token },
           });
         } else {
           dispatch({
             type: INITIALIZE,
-            payload: { isAuthenticated: false, user: null },
+            payload: { isAuthenticated: false, token: null },
           });
         }
       } catch (err) {
         console.error(err);
         dispatch({
           type: INITIALIZE,
-          payload: {
-            isAuthenticated: false,
-            user: null,
-          },
+          payload: { isAuthenticated: false, token: null },
         });
       }
     };
@@ -74,47 +86,70 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password, callback) => {
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-  
-      if (!res.ok) throw new Error("Invalid login");
-  
-      const data = await res.json();
-  
-      localStorage.setItem("username", data.user.username);
-      dispatch({ type: LOGIN_SUCCESS, payload: { user: data.user } });
-  
-      callback();
-    } catch (err) {
-      alert("Login failed: " + err.message);
-    }
-  };
-  
-  const signup = async ({ username, password, email, phonenumber,address }, callback) => {
-    try {
-      const res = await fetch("http://localhost:5000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, email, phonenumber, address }),
-      });
-  
-      if (!res.ok) throw new Error("Signup failed");
-  
-      callback(); // navigate to login
-    } catch (err) {
-      alert("Signup failed: " + err.message);
-    }
-  };
-  
-  
+      const res = await apiService.post("/auth/login", { username, password });
 
-  const logout = async (callback) => {
-    window.localStorage.removeItem("username");
+      localStorage.setItem("token", res.data.token);
+
+      dispatch({ type: LOGIN_SUCCESS, payload: { token: res.data.token } });
+
+      callback(); // gọi callback để chuyển trang
+    } catch (error) {
+      return error.response?.data || "Login failed";
+    }
+  };
+
+  const signup = async (
+    { username, password, email, phonenumber, address },
+    callback
+  ) => {
+    try {
+      const res = await apiService.post("/auth/register", {
+        username,
+        password,
+        email,
+        phonenumber,
+        address,
+      });
+
+      localStorage.setItem("token", res.data.token);
+
+      dispatch({ type: LOGIN_SUCCESS, payload: { token: res.data.token } });
+
+      callback();
+    } catch (error) {
+      return error.response?.data || "Register failed";
+    }
+  };
+
+  const updateProfile = async (updatedUser, callback) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("User is not authenticated");
+      }
+
+      const res = await apiService.put(
+        `/todos/profile/customer/${updatedUser.id}`,
+        updatedUser,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      dispatch({ type: UPDATE_PROFILE, payload: updatedUser });
+
+      callback();
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      return error.response?.data || "Update failed";
+    }
+  };
+
+  const logout = (callback) => {
+    window.localStorage.removeItem("token");
     dispatch({ type: LOGOUT });
-    callback(); 
+    callback();
   };
 
   return (
@@ -124,6 +159,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
+        updateProfile,
       }}
     >
       {children}
