@@ -36,10 +36,10 @@ function LoginPage() {
     const { username, password } = data;
 
     // Attempt login via auth context
-    auth.login(username, password, () => {
-      console.log("Login successful, navigating to:", from);
-      navigate(from, { replace: true });
-    });
+    auth.login(username, password, (targetRoute) => {
+      console.log("Login successful, navigating to:", targetRoute);
+      navigate(targetRoute, { replace: true });
+    });    
   };
 
   const handleSignUpClick = () => {

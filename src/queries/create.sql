@@ -1,7 +1,7 @@
 -- Định nghĩa ENUM
 CREATE TYPE RoleEnum AS ENUM ('Cashier', 'Consultant');
 CREATE TYPE CategoryTypeEnum AS ENUM ('E', 'C', 'FD');
-CREATE TYPE StatusEnum AS ENUM ('Pending', 'Delivered', 'Cancelled');
+CREATE TYPE StatusEnum AS ENUM ('Pending', 'Paid', 'Cancelled');
 CREATE TYPE PaymentEnum AS ENUM ('Cash', 'Credit Card', 'Debit Card', 'Online');
 -- Bảng nhân viên
 CREATE TABLE Employee (
@@ -72,7 +72,7 @@ CREATE TABLE MemberAccount (
 -- Bảng bảo hành
 CREATE TABLE WarrantyCard (
     ProductID INT PRIMARY KEY REFERENCES Product(ProductID) ON DELETE CASCADE,
-    StartDate DATE NOT NULL,
+    StartDate DATE NOT NULL,    
     EndDate DATE NOT NULL
 );
 -- Bảng đơn vị vận chuyển
@@ -99,7 +99,7 @@ CREATE TABLE OrderDetails (
 );
 -- Bảng phương thức thanh toán
 CREATE TABLE PaymentMethod (
-    PaymentID SERIAL PRIMARY KEY,
+    PaymentID SERIAL PRIMARY KEY, 
     ModeOfPayment PaymentEnum NOT NULL
 );
 -- Bảng hóa đơn
