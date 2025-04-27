@@ -13,6 +13,7 @@ import OrderPage from "../pages/OrderPage";
 // 👉 Import the new payment pages
 import PaymentPage from "../pages/PaymentPage";
 import PaymentSuccessPage from "../pages/PaymentSuccessPage";
+import PaymentPageAll from "../pages/PaymentPageAll";
 
 function Router() {
   return (
@@ -28,9 +29,13 @@ function Router() {
         <Route index element={<HomePage />} />
         <Route path="product/:id" element={<DetailPage />} />
         <Route path="profile" element={<CustomerProfilePage />} />
-        <Route path="payment/:productid" element={<PaymentPage />} /> 
+        <Route path="payment" element={<PaymentPageAll />} />
+        <Route path="payment/:productid" element={<PaymentPage />} />
         <Route path="/orders" element={<OrderPage />} />
-        <Route path="payment-success/:productid" element={<PaymentSuccessPage />} />
+        <Route
+          path="payment-success/:productid"
+          element={<PaymentSuccessPage />}
+        />
       </Route>
 
       <Route element={<BlankLayout />}>

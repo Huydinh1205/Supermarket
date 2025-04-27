@@ -17,8 +17,15 @@ Consultant,
 Cashier,
 Checkout,
 Employee,
+users,
+todos,
+products,
+Orders,
+Payments,
+Categories,
 Delivery CASCADE;
 DROP TYPE IF EXISTS CategoryTypeEnum CASCADE;
 DROP TYPE IF EXISTS StatusEnum CASCADE;
 DROP TYPE IF EXISTS PaymentEnum CASCADE;
-DROp TYPE IF EXISTS RoleEnum CASCADE;
+DROP TYPE IF EXISTS RoleEnum CASCADE;
+DROP TYPE IF EXISTS CategoryType CASCADE;

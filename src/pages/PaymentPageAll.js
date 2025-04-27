@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
   Box,
@@ -16,30 +16,16 @@ import {
 import { useAuth } from "../contexts/useAuth";
 import apiService from "../app/apiService";
 
-export default function PaymentPage() {
-  const { productid } = useParams();
+export default function PaymentPageAll() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [paymentMethod, setPaymentMethod] = useState("");
   const [error, setError] = useState("");
-  const [product, setProduct] = useState(location.state?.product || null);
+  const [cart, setCart] = useState(location.state?.cart || []); // Lấy giỏ hàng từ state
   const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(!location.state?.product);
-
-  // Fetch product details if needed
-  useEffect(() => {
-    if (product) return;
-    if (!productid) return;
-
-    setLoading(true);
-    apiService
-      .get(`/api/products/${productid}`)
-      .then((res) => setProduct(res.data))
-      .catch(() => setError("Failed to load product details"))
-      .finally(() => setLoading(false));
-  }, [product, productid]);
+  const [loading, setLoading] = useState(!location.state?.cart);
 
   // Fetch customer profile
   useEffect(() => {
@@ -90,16 +76,23 @@ export default function PaymentPage() {
     }
 
     setLoading(true);
+
     try {
+      // Tạo payload cho nhiều sản phẩm
+      const products = cart.map((item) => ({
+        productID: item.id,
+        quantity: item.quantity,
+      }));
+
       const payload = {
         customerID: customer.id,
-        productID: parseInt(productid, 10),
+        products: products, // Gửi danh sách các sản phẩm và số lượng
         paymentmethod: paymentMethod, // gửi đúng ENUM: 'Cash', 'Credit Card', 'Debit Card', 'Online'
       };
 
       console.log("Placing order with payload:", payload);
 
-      const res = await apiService.post("/todos/orders", payload);
+      const res = await apiService.post("/todos/ordersAll", payload);
 
       if (res.status === 201 && res.data.orderID) {
         navigate(`/payment-success/${res.data.orderID}`);
@@ -120,7 +113,7 @@ export default function PaymentPage() {
   return (
     <Box sx={{ width: "100%", maxWidth: 400, mx: "auto", p: 2 }}>
       <Typography variant="h5" gutterBottom>
-        Payment for {product?.name || `Product #${productid}`}
+        Payment for {cart.length} Product{cart.length > 1 ? "s" : ""}
       </Typography>
 
       {loading && <CircularProgress sx={{ my: 2 }} />}
@@ -131,11 +124,14 @@ export default function PaymentPage() {
         </Alert>
       )}
 
-      {!loading && product && (
+      {!loading && cart.length > 0 && (
         <Box sx={{ mb: 2 }}>
-          <Typography>
-            <strong>Price:</strong> ${product.price}
-          </Typography>
+          {cart.map((product) => (
+            <Typography key={product.id}>
+              <strong>{product.name}</strong> - ${product.price} x{" "}
+              {product.quantity} = ${product.price * product.quantity}
+            </Typography>
+          ))}
         </Box>
       )}
 

@@ -25,7 +25,7 @@ function DetailPage() {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const res = await apiService.get(`/api/products/${id}`);
+        const res = await apiService.get(`/todos/products/${id}`);
         setProduct(res.data);
         setError("");
       } catch (err) {
@@ -67,7 +67,7 @@ function DetailPage() {
                       height: "100%",
                       objectFit: "cover",
                     }}
-                    src={product.imageurl}
+                    src={product.image}
                     alt={product.name}
                   />
                 </Box>
@@ -85,18 +85,23 @@ function DetailPage() {
                 </Typography>
 
                 <Typography variant="body1" sx={{ mt: 1 }}>
-                  <strong>Category:</strong> {product.categoryname}
+                  <strong>Category:</strong> {product.type}
                 </Typography>
 
                 <Typography variant="body1">
-                  <strong>Warehouse:</strong> {product.warehousename}
+                  <strong>Warehouse:</strong> {product.warehouse}
                 </Typography>
-
+                <Typography variant="body2" color="text.secondary">
+                  Product ID: {product.id}
+                </Typography>
                 <Divider sx={{ my: 2 }} />
 
-                <Typography variant="body2" color="text.secondary">
-                  Product ID: {product.productid}
-                </Typography>
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Description
+                  </Typography>
+                  <Typography variant="body1">{product.description}</Typography>
+                </Box>
               </Grid>
             </Grid>
           </Card>

@@ -156,7 +156,7 @@ export default function CustomerProfilePage() {
                         Email
                       </Typography>
                       <Typography variant="body1" sx={{ color: "#FFFFFF" }}>
-                        {customerInfo.email}
+                        {customerInfo.address}
                       </Typography>
                     </Box>
                     <Box>

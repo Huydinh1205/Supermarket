@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (
-    { username, password, email, phonenumber, address },
+    { username, password, email, phonenumber, address, role },
     callback
   ) => {
     try {
@@ -109,6 +109,7 @@ export const AuthProvider = ({ children }) => {
         email,
         phonenumber,
         address,
+        role,
       });
 
       localStorage.setItem("token", res.data.token);

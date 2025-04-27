@@ -1,7 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Typography, Button } from "@mui/material";
-import { useForm } from "react-hook-form";
+import {
+  Stack,
+  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  FormHelperText,
+} from "@mui/material";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { FormProvider, FTextField } from "../components/form";
@@ -19,6 +28,9 @@ const SignUpSchema = Yup.object().shape({
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password"), null], "Passwords must match")
     .required("Please confirm your password"),
+  role: Yup.string()
+    .oneOf(["Cashier", "Consultant", "Customer"], "Invalid role")
+    .required("Role is required"),
 });
 
 // Default Values
@@ -44,10 +56,10 @@ function SignUpPage() {
   const { handleSubmit } = methods;
 
   const onSubmit = async (data) => {
-    const { username, password, email, phonenumber, address } = data;
+    const { username, password, email, phonenumber, address, role } = data;
 
     const error = await auth.signup(
-      { username, password, email, phonenumber, address },
+      { username, password, email, phonenumber, address, role },
       () => {
         console.log("Signup successful. Redirecting to login...");
         navigate("/login");
@@ -74,6 +86,24 @@ function SignUpPage() {
           label="Confirm Password"
           type="password"
         />
+        <FormControl fullWidth>
+          <InputLabel>Role</InputLabel>
+          <Controller
+            name="role"
+            control={methods.control}
+            render={({ field }) => (
+              <Select {...field} label="Role">
+                <MenuItem value="Cashier">Cashier</MenuItem>
+                <MenuItem value="Consultant">Consultant</MenuItem>
+                <MenuItem value="Customer">Customer</MenuItem>
+              </Select>
+            )}
+          />
+          {/* Display error for role if it doesn't pass validation */}
+          <FormHelperText error>
+            {methods.formState.errors.role?.message}
+          </FormHelperText>
+        </FormControl>
         {errorMessage && (
           <Typography color="error" variant="body2" textAlign="center">
             Invalid username or password

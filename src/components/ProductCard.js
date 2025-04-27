@@ -7,17 +7,21 @@ import { Button, CardActionArea, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { fCurrency } from "../utils";
 
-function ProductCard({ product }) {
+function ProductCard({ product, onAddToCart }) {
   const navigate = useNavigate();
 
   const handleGoToDetail = () => {
-    navigate(`/product/${product.productid}`);
+    navigate(`/product/${product.id}`, { state: { product } });
   };
 
   const handleGoToPayment = () => {
-    navigate(`/payment/${product.productid}`);
+    navigate(`/payment/${product.id}`, { state: { product } });
   };
-
+  const handleAddToCart = () => {
+    if (onAddToCart) {
+      onAddToCart(product);
+    }
+  };
   return (
     <Card>
       <CardActionArea onClick={handleGoToDetail}>
@@ -56,6 +60,14 @@ function ProductCard({ product }) {
       <CardContent>
         <Button variant="contained" fullWidth onClick={handleGoToPayment}>
           Pay Now
+        </Button>
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={handleAddToCart}
+          sx={{ mt: 1 }}
+        >
+          Add to Cart
         </Button>
       </CardContent>
     </Card>

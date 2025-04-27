@@ -1,8 +1,17 @@
 -- Định nghĩa ENUM
 CREATE TYPE RoleEnum AS ENUM ('Cashier', 'Consultant');
-CREATE TYPE CategoryTypeEnum AS ENUM ('E', 'C', 'FD');
+CREATE TYPE CategoryType AS ENUM (
+    'Electris',
+    'Clothing',
+    'Food',
+    'Furniture',
+    'Stationery',
+    'Cosmetics',
+    'Toys'
+);
 CREATE TYPE StatusEnum AS ENUM ('Pending', 'Delivered', 'Cancelled');
 CREATE TYPE PaymentEnum AS ENUM ('Cash', 'Credit Card', 'Debit Card', 'Online');
+CREATE TYPE Role AS ENUM ('Cashier', 'Consultant', 'Guest');
 -- Bảng nhân viên
 CREATE TABLE Employee (
     EmployeeID SERIAL PRIMARY KEY,
