@@ -424,10 +424,10 @@ router.get("/cashiers/:empId", async (req, res) => {
 // ------------------ CONSULTANT ROUTES ------------------
 // Get consultant's profile
 router.get("/employee/:employeeid/profile", async (req, res) => {
-  let { employeeid } = req.params;  // Ensure employeeid is treated as a number
-  employeeid = Number(employeeid);  // Cast to number if needed
+  let { employeeid } = req.params;  
+  employeeid = Number(employeeid); 
 
-  console.log("[API] /:employeeid/profile called with employeeid:", employeeid);
+  //console.log("[API] /:employeeid/profile called with employeeid:", employeeid);
 
   try {
     // Query Employee table using employeeid from users table
@@ -441,7 +441,7 @@ router.get("/employee/:employeeid/profile", async (req, res) => {
       [employeeid]
     );
 
-    console.log("[API] Query result:", result.rows);  // Log the result from the query
+    //console.log("[API] Query result:", result.rows);  // Log the result from the query
 
     if (result.rows.length === 0) {
       console.log("[API] Consultant not found for employeeid:", employeeid);
@@ -460,7 +460,7 @@ router.get("/employee/:employeeid/profile", async (req, res) => {
 // Get invoices handled by a consultant
 router.get("/consultants/:employeeid/invoices", async (req, res) => {
   let { employeeid } = req.params;
-  console.log("Fetching invoices for employee ID (raw):", employeeid); // Debug
+  //console.log("Fetching invoices for employee ID (raw):", employeeid); // Debug
 
   employeeid = Number(employeeid); // Make sure it's number type
 
@@ -473,13 +473,49 @@ router.get("/consultants/:employeeid/invoices", async (req, res) => {
        WHERE i.consultantid = $1`, 
       [employeeid]
     );
-    console.log("API Response Data:", result.rows);
+    //console.log("API Response Data:", result.rows);
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching consultant invoices:", err);
     res.status(500).json({ error: "Failed to fetch consultant invoices" });
   }
 });
+// Backend route to get member account by username
+router.get('/memberaccount/user/:username', async (req, res) => {
+  const { username } = req.params;
+  console.log("Received username:", username);
+  try {
+    // Step 1: Get customerID from username
+    const customerResult = await pool.query(
+      `SELECT c.customerid FROM Customer c 
+       JOIN users u ON c.userid = u.id 
+       WHERE u.username = $1`,
+      [username]
+    );
+
+    if (customerResult.rows.length === 0) {
+      return res.status(404).json({ message: "Customer not found for this user" });
+    }
+
+    const customerId = customerResult.rows[0].customerid;
+
+    // Step 2: Get member account using customerID
+    const memberResult = await pool.query(
+      `SELECT * FROM MemberAccount WHERE customerid = $1`,
+      [customerId]
+    );
+
+    if (memberResult.rows.length === 0) {
+      return res.status(404).json({ message: "Member account not found" });
+    }
+
+    res.json(memberResult.rows[0]);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server error");
+  }
+});
+
 
 
 module.exports = router;

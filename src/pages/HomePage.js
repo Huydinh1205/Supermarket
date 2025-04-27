@@ -75,6 +75,9 @@ function HomePage() {
           <Button variant="outlined" onClick={() => navigate("/profile")}>
             Profile
           </Button>
+          <Button variant="outlined" onClick={() => navigate("/MemberAccountInfo")}>
+            Membership Info
+          </Button>
           <Button variant="contained" onClick={() => navigate("/orders")}>
             Orders
           </Button>

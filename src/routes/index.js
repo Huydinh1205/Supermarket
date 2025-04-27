@@ -17,7 +17,7 @@ import CashierDashboard from "../pages/CashierDashboard";
 import ConsultantDashboard from "../pages/ConsultantDashboard";
 import ProtectedRouteByRole from "./ProtectedRouteByRole"; // you'll create this
 import ConsultantInvoicesPage from "../pages/ConsultantInvoicesPage";
-
+import MemberAccountInfo from "../pages/MemberAccountInfo";
 function Router() {
   return (
     <Routes>
@@ -34,6 +34,7 @@ function Router() {
         <Route path="profile" element={<CustomerProfilePage />} />
         <Route path="payment/:productid" element={<PaymentPage />} />
         <Route path="/orders" element={<OrderPage />} />
+        <Route path="/MemberAccountInfo" element={<MemberAccountInfo />} />
         <Route path="payment-success/:productid" element={<PaymentSuccessPage />} />
       </Route>
 
